@@ -1,2 +1,4 @@
-# vue-source-code-explore
+# react-source-code-explore
 vue 源码探索
+
+# 请阅读各自文件的README.md
