@@ -9,7 +9,20 @@
 <body>
   <script src="vue.js"></script>
   <script>
-    console.log(Vue)
+    const vm = new Vue({
+      data(){
+        return {
+          name:'yyfeng',
+          height:180,
+          address:{
+            place:'张江'
+          }
+        }
+      }
+    })
+    console.log(vm)
+    vm.name = 'yyfeng1'
+    console.log(vm.name)
   </script>
 </body>
 </html>
