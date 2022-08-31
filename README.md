@@ -1,5 +1,5 @@
 # react-source-code-explore
-vue 源码探索
+vue 源码探索 参考文章  https://juejin.cn/post/6935344605424517128
 
 # vue2 History
 
