@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script src="vue.js"></script>
+  <div id="app">
+    <div style="color:red">{{name}}</div>
+    <span >开始{{height}} 过程1 {{name}} 过程2 {{address}} 结束</span>
+  </div>
+  <script>
+    const vm = new Vue({
+      data(){
+        return {
+          name:'yyfeng',
+          height:180,
+          address:{
+            place:'张江'
+          },
+          hobby:['eat','drink']
+        }
+      },
+      el:'#app'
+    })
+    console.log(vm)
+    setTimeout(() => {
+      vm.name = "maweiqian"
+      vm.name = "maweiqian1"
+      vm.name = "maweiqian2"
+      vm.name = "maweiqian3"
+      //值改变了重新走render访问模版变量 然后更新到dom上去
+      // vm._update(vm._render())
+    }, 2000);
+  </script>
+</body>
+</html>
