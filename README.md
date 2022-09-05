@@ -16,3 +16,7 @@ vue 源码探索 参考文章  https://juejin.cn/post/6935344605424517128
 ## 虚拟dom 生成
 
 ## 通过虚拟dom生成真实dom
+
+## 渲染更新=> 依赖收集&派发更新  dep 收集watcher 以及watcher 更新
+
+## 渲染更新 => 让watcher也记忆dep 这样如果组件卸载了 就可以把组件的依赖也删除了 包括后续的computer Watcher也能用到
