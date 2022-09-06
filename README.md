@@ -27,7 +27,7 @@ vue 源码探索 参考文章  https://juejin.cn/post/6935344605424517128
 
 ## computed 的实现
 
-## watch 的实现
+## watch 的实现  在init创建的时候就已经创建watcher  watcher中的getter对应的就是取值函数 这个时候执行的就会执行对应属性的收集依赖 这个时候依赖已经被收集在dep中了
 
 ## Vue.mixin 以及生命周期的实现
 
