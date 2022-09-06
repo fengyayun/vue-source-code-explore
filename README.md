@@ -22,3 +22,15 @@ vue 源码探索 参考文章  https://juejin.cn/post/6935344605424517128
 ## 渲染更新 => 让watcher也记忆dep 这样如果组件卸载了 就可以把组件的依赖也删除了 包括后续的computer Watcher也能用到
 
 ## 渲染更新 => 数组的改变也要触发渲染更新
+
+## nextTick的实现
+
+## computed 的实现
+
+## watch 的实现
+
+## Vue.mixin 以及生命周期的实现
+
+## diff 优化策略的实现
+
+## 完整diff的实现
