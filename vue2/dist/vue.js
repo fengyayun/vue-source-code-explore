@@ -228,11 +228,11 @@
     // }
   }
 
-  if (Promise) {
+  if (typeof Promise !== "undefined") {
     timerFunc = function timerFunc() {
       Promise.resolve().then(flushCallbacks);
     };
-  } else if (MutationObserver) {
+  } else if (typeof MutationObserver !== "undefined") {
     var observe$1 = new MutationObserver(flushCallBacks);
     var textNode = document.createTextNode(1);
     observe$1.observe(textNode, {
@@ -242,7 +242,7 @@
     timerFunc = function timerFunc() {
       textNode.textContent = 2;
     };
-  } else if (setImmediate) {
+  } else if (typeof setImmediate !== "undefined") {
     timerFunc = function timerFunc() {
       setImmediate(flushCallbacks);
     };
@@ -263,14 +263,36 @@
     }
   }
 
-  var initGlobalApi = function initGlobalApi(Vue) {
-    Vue.options = {};
+  var oldArrayProto = Array.prototype;
+  var arrayMethods = Object.create(oldArrayProto);
+  var methods = ['push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice'];
+  methods.forEach(function (method) {
+    arrayMethods[method] = function () {
+      var ob = this.__ob__;
+      var inserted; //有些新增会增加一些对象 要对这些对象重新定义属性
 
-    Vue.mixin = function (mixin) {
-      Vue.options = mergeOptions(this.options, mixin);
-      return this; //保障链式调用
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      switch (method) {
+        case 'push':
+        case 'unshift':
+          inserted = args;
+          break;
+
+        case 'splice':
+          inserted = args.slice(2);
+          break;
+      } //对于新增的数据要想实现重新定义属性必须拿observe.observeArray
+
+
+      if (inserted && inserted.length > 0) ob.observeArray(inserted);
+      var result = oldArrayProto[method].apply(this, args);
+      ob.dep && ob.dep.notify();
+      return result;
     };
-  };
+  });
 
   var id$1 = 0;
 
@@ -317,6 +339,226 @@
     stack.pop();
     Dep.target = stack[stack.length - 1];
   }
+
+  var Observe = /*#__PURE__*/function () {
+    function Observe(data) {
+      _classCallCheck(this, Observe);
+
+      this.dep = new Dep(); //被观测过的对象上加一个__ob__属性并且不让被遍历到
+
+      Object.defineProperty(data, '__ob__', {
+        value: this,
+        enumerable: false,
+        configurable: false
+      }); //对于数组默认观测的是索引 数组较大会非常耗性能 而且开发过程该数组索引的场景也是非常低 需要对数组常用的方法进行拦截
+      //对于数组的长度以及索引改变没有被监测
+
+      if (Array.isArray(data)) {
+        //考虑兼容性的话可以遍历赋值
+        data.__proto__ = arrayMethods;
+        this.observeArray(data);
+      } else {
+        this.walk(data);
+      }
+    }
+
+    _createClass(Observe, [{
+      key: "walk",
+      value: function walk(data) {
+        Object.keys(data).forEach(function (key) {
+          return defineReactive(data, key, data[key]);
+        });
+      }
+    }, {
+      key: "observeArray",
+      value: function observeArray(data) {
+        if (!Array.isArray(data)) return;
+        data.forEach(function (item) {
+          return observe(item);
+        });
+      }
+    }]);
+
+    return Observe;
+  }();
+
+  function dependArray(value) {
+    for (var index = 0; index < value.length; index++) {
+      var current = value[index];
+      current.__ob__ && current.__ob__.dep.depend();
+
+      if (Array.isArray(current)) {
+        dependArray(current);
+      }
+    }
+  }
+
+  function defineReactive(target, key, value) {
+    // 递归的重新定义属性 
+    var childDep = observe(value);
+    var dep = new Dep();
+    Object.defineProperty(target, key, {
+      set: function set(newValue) {
+        if (value === newValue) return; //处理用户设置成新对象还需要去观测
+
+        observe(newValue);
+        value = newValue;
+        dep.notify();
+      },
+      get: function get() {
+        if (Dep.target) {
+          dep.depend(); //针对数组也要收集依赖
+
+          if (childDep && childDep.dep) {
+            childDep.dep.depend(); //处理数组中嵌套的数组的依赖收集
+
+            if (Array.isArray(value)) {
+              dependArray(value);
+            }
+          }
+        }
+
+        return value;
+      }
+    });
+  }
+  function observe(data) {
+    //只监测对象类型 
+    if (!(data && _typeof(data) === 'object')) return;
+
+    if (data.__ob__) {
+      return data;
+    }
+
+    return new Observe(data);
+  }
+
+  var initGlobalApi = function initGlobalApi(Vue) {
+    Vue.options = {};
+    Vue.options._base = Vue;
+
+    Vue.mixin = function (mixin) {
+      Vue.options = mergeOptions(this.options, mixin);
+      return this; //保障链式调用
+    };
+
+    Vue.use = function () {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      var plugin = args[0];
+      var installedPlugins = this._installedPlugins || (this._installedPlugins = []);
+
+      if (installedPlugins.indexOf(plugin) > -1) {
+        // 如果安装过这个插件直接返回
+        return this;
+      }
+
+      args = args.slice(1); // 获取参数
+
+      args.unshift(this); //在参数中增加Vue构造函数
+
+      if (typeof plugin.install === "function") {
+        plugin.install.apply(plugin, args); // 执行install方法
+      } else if (typeof plugin === "function") {
+        plugin.apply(null, args); // 没有install方法直接把传入的插件执行
+      } // 记录安装的插件
+
+
+      installedPlugins.push(plugin);
+      return this;
+    };
+
+    Vue.nextTick = nextTick;
+
+    Vue.set = function (target, key, value) {
+      if (Array.isArray(target)) {
+        // 如果是数组直接调用重写的splice 方法 来达到更新
+        target.length = Math.max(target.length, key);
+        target.splice(key, 1, value);
+        return value;
+      } //如果是对象本身的属性 说明已经添加过的依赖 就直接赋值即可
+
+
+      if (key in target && !(key in Object.prototype)) {
+        target[key] = value;
+        return value;
+      }
+
+      var ob = target.__ob__;
+
+      if (!ob) {
+        // 说明这个对象都不是响应式的 那直接赋值就行了
+        target[key] = value;
+        return value;
+      } //利用defineReactive 将新增的属性定义成响应式
+
+
+      defineReactive(ob.value, key, value);
+      ob.dep.notify();
+      return value;
+    };
+
+    Vue.del = function (target, key) {
+      if (Array.isArray(target)) {
+        target.splice(key, 1);
+        return;
+      }
+
+      var ob = target.__ob__; // 如果对象本身就没有这个属性 什么都不做
+
+      if (!hasOwn(target, key)) {
+        return;
+      } // 直接使用delete  删除这个属性
+
+
+      delete target[key]; //   如果对象本身就不是响应式 直接返回
+
+      if (!ob) {
+        return;
+      }
+
+      ob.dep.notify(); //通知视图更新
+    };
+
+    Vue.extend = function (options) {
+      function Sub() {
+        this._init(options);
+      }
+
+      Sub.prototype = Object.create(Vue.prototype);
+      Sub.prototype.constructor = Sub; //组件的options 挂到构造函数属性上去
+
+      Sub.options = options;
+      return Sub;
+    }; // 组件、指令、过滤器
+
+
+    var ASSET_TYPES = ["component", "directive", "filter"];
+    ASSET_TYPES.forEach(function (type) {
+      Vue[type] = function (id, definition) {
+        if (!definition) {
+          return this.options[type + 's'][id];
+        }
+
+        if (type === 'component' && isObject(definition)) {
+          definition.name = definition.name || id;
+          definition = this.options._base.extend(definition);
+        }
+
+        if (type === 'directive' && typeof definition === 'function') {
+          definition = {
+            bind: definition,
+            update: definition
+          };
+        }
+
+        this.options[type + 's'][id] = definition;
+        return definition;
+      };
+    });
+  };
 
   var id = 0;
 
@@ -453,131 +695,6 @@
         pending = true;
       }
     }
-  }
-
-  var oldArrayProto = Array.prototype;
-  var arrayMethods = Object.create(oldArrayProto);
-  var methods = ['push', 'pop', 'shift', 'unshift', 'sort', 'reverse', 'splice'];
-  methods.forEach(function (method) {
-    arrayMethods[method] = function () {
-      var ob = this.__ob__;
-      var inserted; //有些新增会增加一些对象 要对这些对象重新定义属性
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      switch (method) {
-        case 'push':
-        case 'unshift':
-          inserted = args;
-          break;
-
-        case 'splice':
-          inserted = args.slice(2);
-          break;
-      } //对于新增的数据要想实现重新定义属性必须拿observe.observeArray
-
-
-      if (inserted && inserted.length > 0) ob.observeArray(inserted);
-      var result = oldArrayProto[method].apply(this, args);
-      ob.dep && ob.dep.notify();
-      return result;
-    };
-  });
-
-  var Observe = /*#__PURE__*/function () {
-    function Observe(data) {
-      _classCallCheck(this, Observe);
-
-      this.dep = new Dep(); //被观测过的对象上加一个__ob__属性并且不让被遍历到
-
-      Object.defineProperty(data, '__ob__', {
-        value: this,
-        enumerable: false,
-        configurable: false
-      }); //对于数组默认观测的是索引 数组较大会非常耗性能 而且开发过程该数组索引的场景也是非常低 需要对数组常用的方法进行拦截
-      //对于数组的长度以及索引改变没有被监测
-
-      if (Array.isArray(data)) {
-        //考虑兼容性的话可以遍历赋值
-        data.__proto__ = arrayMethods;
-        this.observeArray(data);
-      } else {
-        this.walk(data);
-      }
-    }
-
-    _createClass(Observe, [{
-      key: "walk",
-      value: function walk(data) {
-        Object.keys(data).forEach(function (key) {
-          return defineReactive(data, key, data[key]);
-        });
-      }
-    }, {
-      key: "observeArray",
-      value: function observeArray(data) {
-        if (!Array.isArray(data)) return;
-        data.forEach(function (item) {
-          return observe(item);
-        });
-      }
-    }]);
-
-    return Observe;
-  }();
-
-  function dependArray(value) {
-    for (var index = 0; index < value.length; index++) {
-      var current = value[index];
-      current.__ob__ && current.__ob__.dep.depend();
-
-      if (Array.isArray(current)) {
-        dependArray(current);
-      }
-    }
-  }
-
-  function defineReactive(target, key, value) {
-    // 递归的重新定义属性 
-    var childDep = observe(value);
-    var dep = new Dep();
-    Object.defineProperty(target, key, {
-      set: function set(newValue) {
-        if (value === newValue) return; //处理用户设置成新对象还需要去观测
-
-        observe(newValue);
-        value = newValue;
-        dep.notify();
-      },
-      get: function get() {
-        if (Dep.target) {
-          dep.depend(); //针对数组也要收集依赖
-
-          if (childDep && childDep.dep) {
-            childDep.dep.depend(); //处理数组中嵌套的数组的依赖收集
-
-            if (Array.isArray(value)) {
-              dependArray(value);
-            }
-          }
-        }
-
-        return value;
-      }
-    });
-  }
-
-  function observe(data) {
-    //只监测对象类型 
-    if (!(data && _typeof(data) === 'object')) return;
-
-    if (data.__ob__) {
-      return data;
-    }
-
-    return new Observe(data);
   }
 
   function initState(vm) {

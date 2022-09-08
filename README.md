@@ -34,3 +34,5 @@ vue 源码探索 参考文章  https://juejin.cn/post/6935344605424517128
 ## diff 优化策略的实现
 
 ## 完整diff的实现
+
+## Vue的全局API的实现 如：Vue.use Vue.component Vue.extend Vue.set Vue.mixin
