@@ -1,4 +1,4 @@
-# react-source-code-explore
+# vue2-source-code-explore
 vue 源码探索 参考文章  https://juejin.cn/post/6935344605424517128
 
 # vue2 History
@@ -36,3 +36,16 @@ vue 源码探索 参考文章  https://juejin.cn/post/6935344605424517128
 ## 完整diff的实现
 
 ## Vue的全局API的实现 如：Vue.use Vue.component Vue.extend Vue.set Vue.mixin
+
+## 子组件的渲染实现
+
+
+# Vuex 的实现
+
+## 实现Vuex的基本功能(除了module)
+
+
+
+
+
+
