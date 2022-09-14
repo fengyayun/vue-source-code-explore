@@ -1,14 +1,6 @@
 let Vue;
 import ModuleCollection from "./Modules";
 import { forEachValue } from "./util";
-
-//replaceState之后要每次取最新的
-function getState(store,path){
-  return path.reduce((newState,current) =>{
-    return newState[current]
-  },store.state)
-}
-
 /**
  *
  * @param {*} store 容器
@@ -26,10 +18,7 @@ function installModule(store, rootState, path, module) {
     // 给mutation 包装一个函数
     store._mutations[namespacedKey].push((payload) => {
       //每次commit之前走这个方法修改对应module的state
-      mutation.call(store, getState(store,path), payload);
-      store._subscribes.forEach((fn) =>
-        fn({ type: namespacedKey, payload }, rootState)
-      );
+      mutation.call(store, module.state, payload);
     });
   });
 
@@ -97,7 +86,6 @@ class Store {
     this._wrapGetters = {};
     this._actions = {};
     this._mutations = {};
-    this._subscribes = [];
     // 1. 模块的收集
     this.modules = new ModuleCollection(options);
 
@@ -106,8 +94,6 @@ class Store {
 
     // 3.状态的处理
     registerStoreVM(this, state);
-    let plugins = options.plugins || [];
-    plugins.forEach((plugin) => plugin(this));
   }
   get state() {
     return this._vm.state;
@@ -121,12 +107,6 @@ class Store {
     let actions = this._actions[method];
     actions.forEach((action) => action(data));
   };
-  subscribe(fn) {
-    this._subscribes.push(fn);
-  }
-  replaceState(newState) {
-    this._vm.state = newState;
-  }
 }
 function install(_Vue) {
   Vue = _Vue;

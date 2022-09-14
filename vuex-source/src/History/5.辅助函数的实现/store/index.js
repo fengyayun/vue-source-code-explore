@@ -13,28 +13,7 @@ import b from "./b";
 // }
 // Vue.use(A)
 
-// const myPlugin = () =>{
-//   return function (store){
-//     store.subscribe((mutation,state) =>{
-//       console.log(mutation,state)
-//     })
-//   }
-// }
-
-const persistPlugin = () => {
-  return function (store) {
-    let initialState = window.localStorage.getItem("VUX:STATE");
-    if (initialState && initialState.length > 0) {
-      store.replaceState(JSON.parse(initialState));
-    }
-    store.subscribe((mutation, state) => {
-      window.localStorage.setItem("VUX:STATE", JSON.stringify(state));
-    });
-  };
-};
-
 export default new Vuex.Store({
-  plugins: [persistPlugin()],
   state: {
     age: 30,
   },

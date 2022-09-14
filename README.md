@@ -45,6 +45,14 @@ vue 源码探索 参考文章  https://juejin.cn/post/6935344605424517128
 ## 实现Vuex的基本功能
 ## 实现了Module的数据收集功能
 
+## 对module收集的数据进行注册处理
+
+## 对module的namespaced的处理
+
+## 辅助函数的实现 mapState,mapGetters
+
+## 插件的实现以及实现一个数据持久化的插件
+
 
 
 
