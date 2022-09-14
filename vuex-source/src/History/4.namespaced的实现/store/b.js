@@ -1,21 +1,6 @@
-import Vue from "vue";
-// import Vuex from "vuex";
-import Vuex from "../Vuex/index";
-Vue.use(Vuex);
-import a from "./a";
-import b from "./b";
-
-// function A(_Vue){
-//   console.log("1111",_Vue)
-// }
-// A.install = function(_Vue){
-//   console.log('2222',_Vue)
-// }
-// Vue.use(A)
-
-export default new Vuex.Store({
+export default {
   state: {
-    age: 30,
+    age: 10,
   },
   getters: {
     bigAge(state) {
@@ -35,8 +20,5 @@ export default new Vuex.Store({
       }, 2000);
     },
   },
-  modules: {
-    a,
-    b,
-  },
-});
+  modules: {},
+};

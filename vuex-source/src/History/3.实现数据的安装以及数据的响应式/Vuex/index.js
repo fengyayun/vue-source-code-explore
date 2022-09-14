@@ -9,25 +9,20 @@ import { forEachValue } from "./util";
  * @param {*} module 每次遍历的模块
  */
 function installModule(store, rootState, path, module) {
-  let namespaced = store.modules.getNamespace(path);
-
   // 收集mutations
   module.forEachMutations((key, mutation) => {
-    let namespacedKey = namespaced + key;
-    store._mutations[namespacedKey] = store._mutations[namespacedKey] || [];
+    store._mutations[key] = store._mutations[key] || [];
     // 给mutation 包装一个函数
-    store._mutations[namespacedKey].push((payload) => {
-      //每次commit之前走这个方法修改对应module的state
-      mutation.call(store, module.state, payload);
+    store._mutations[key].push((payload) => {
+      mutation.call(store, store.state, payload);
     });
   });
 
   // 收集actions
   module.forEachActions((key, action) => {
-    let namespacedKey = namespaced + key;
-    store._actions[namespacedKey] = store._actions[namespacedKey] || [];
+    store._actions[key] = store._actions[key] || [];
     // 给mutation 包装一个函数
-    store._actions[namespacedKey].push((payload) => {
+    store._actions[key].push((payload) => {
       action.call(store, store, payload);
     });
   });

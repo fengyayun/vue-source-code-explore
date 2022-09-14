@@ -42,7 +42,8 @@ vue 源码探索 参考文章  https://juejin.cn/post/6935344605424517128
 
 # Vuex 的实现
 
-## 实现Vuex的基本功能(除了module)
+## 实现Vuex的基本功能
+## 实现了Module的数据收集功能
 
 
 

@@ -13,25 +13,25 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    age:30
+    age: 30,
   },
-  getters:{
-    bigAge(state){
-      console.log('缓存')
-      return state.age + 5
-    }
+  getters: {
+    bigAge(state) {
+      console.log("缓存");
+      return state.age + 5;
+    },
   },
   mutations: {
-    changeAge(state,payload){
-      state.age = state.age + payload
-    }
+    changeAge(state, payload) {
+      state.age = state.age + payload;
+    },
   },
   actions: {
-    asyncChangeAge({commit},payload){
+    asyncChangeAge({ commit }, payload) {
       setTimeout(() => {
-        commit('changeAge',payload)
+        commit("changeAge", payload);
       }, 2000);
-    }
+    },
   },
   modules: {},
 });
