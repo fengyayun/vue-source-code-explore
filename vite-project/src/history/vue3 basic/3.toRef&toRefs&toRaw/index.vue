@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>toRef</h1>
-    <div>obj:{{ obj }}------like:{{ like }} --- name:{{ name }}</div>
+    <!-- <div>obj:{{ obj }}------like:{{ like }} --- name:{{ name }}</div> -->
     <button @click="change">修改</button>
   </div>
 </template>
