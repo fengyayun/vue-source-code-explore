@@ -17,6 +17,8 @@
     "@vue/cli-plugin-router": "~4.5.13",
     "@vue/cli-plugin-vuex": "~4.5.13",
     "@vue/cli-service": "~4.5.13",
-    "@vue/compiler-sfc": "^3.0.0"
+    "@vue/compiler-sfc": "^3.0.0",
+    "lodash-es": "^4.17.21",
+    "marked": "^4.1.0"
   }
 }
