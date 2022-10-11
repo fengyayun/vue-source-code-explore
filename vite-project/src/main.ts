@@ -1,7 +1,8 @@
 import { createApp } from 'vue'
 import './style.css'
 import './assets/reset.less'
+import 'element-plus/dist/index.css'
+import ElementPlus from 'element-plus'
 import App from './App.vue'
-import Card from './components/Card/index.vue'
 
-createApp(App).component('Card',Card).mount('#app')
+createApp(App).use(ElementPlus).mount('#app')
