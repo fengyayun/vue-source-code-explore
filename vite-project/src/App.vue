@@ -1,19 +1,8 @@
 <template>
-  <div class="App">
-      <button @click="change">change falg</button>
-      <A></A>
-  </div>
+  <div class="App"></div>
 </template>
-  
-<script setup lang='ts'>
-import { provide, ref } from 'vue'
-import A from './views/A.vue'
-let flag = ref<number>(1)
-provide('flag', flag)
-const change = () => {
-  flag.value = 2
-}
-</script>
+
+<script setup lang="ts"></script>
 <style>
 .App {
   background: blue;
