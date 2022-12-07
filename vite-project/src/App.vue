@@ -1,11 +1,10 @@
 <template>
-  <div class="App"></div>
+  <div class="App">
+  11
+  </div>
 </template>
 
 <script setup lang="ts"></script>
 <style>
-.App {
-  background: blue;
-  color: #fff;
-}
+
 </style>
